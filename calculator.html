@@ -439,23 +439,27 @@
         .breakdown-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         .breakdown-table th {
             background: var(--ramsey-blue);
             color: white;
-            padding: 12px;
+            padding: 12px 8px;
             text-align: left;
             position: sticky;
             top: 0;
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
         .breakdown-table td {
-            padding: 10px 12px;
+            padding: 10px 8px;
             border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
         }
-        .breakdown-table tr:hover { background: var(--ramsey-gray-light); }
+        .breakdown-table tr:hover { 
+            filter: brightness(0.95);
+        }
         .breakdown-table .paid-off {
-            background: #e8f5e9;
             font-weight: 600;
         }
         .debt-list h2 {
@@ -741,9 +745,9 @@
             .countdown-value { font-size: 1.5rem; }
             .countdown-label { font-size: 0.75rem; }
             .debt-details { grid-template-columns: 1fr; gap: 8px; }
-            .monthly-breakdown { max-height: 300px; }
-            .breakdown-table { font-size: 0.8rem; }
-            .breakdown-table th, .breakdown-table td { padding: 8px; }
+            .monthly-breakdown { max-height: 300px; overflow-x: auto; }
+            .breakdown-table { font-size: 0.75rem; min-width: 600px; }
+            .breakdown-table th, .breakdown-table td { padding: 6px 4px; }
             .quick-actions { flex-direction: column; }
             .btn-small { width: 100%; }
             .affiliate-links { grid-template-columns: 1fr; }
@@ -868,15 +872,20 @@
 
                 <div class="timeline">
                     <h3>📅 Month-by-Month Breakdown</h3>
+                    <p style="color: var(--ramsey-gray); font-size: 0.9rem; margin-bottom: 15px;">
+                        💡 Each color represents attacking a different debt. Watch your total paid grow!
+                    </p>
                     <div class="monthly-breakdown">
                         <table class="breakdown-table" id="breakdownTable">
                             <thead>
                                 <tr>
                                     <th>Month</th>
-                                    <th>Debt Target</th>
-                                    <th>Minimum</th>
+                                    <th>Focus Debt</th>
+                                    <th>Min</th>
                                     <th>Extra</th>
+                                    <th>Month Total</th>
                                     <th>Total Paid</th>
+                                    <th>Progress</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -1663,15 +1672,95 @@
             const interestSaved = Math.max(0, noExtra.totalInterest - result.totalInterest);
             document.getElementById('interestSaved').textContent = formatMoney(interestSaved);
 
+            // Enhanced Monthly Breakdown with running totals
             const tbody = document.getElementById('breakdownBody');
             clearElement(tbody);
-            result.monthlyBreakdown.forEach(m => {
+            
+            let totalPaidSoFar = 0;
+            let currentTargetDebt = '';
+            let phaseColorIndex = 0;
+            const phaseColors = ['#e3f2fd', '#f3e5f5', '#e8f5e9', '#fff3e0', '#fce4ec'];
+            
+            result.monthlyBreakdown.forEach((m, index) => {
                 const row = createElement('tr');
-                if (m.status.includes('PAID')) row.className = 'paid-off';
-                [m.month, m.target, `$${m.minimum.toLocaleString()}`, `$${m.extra.toLocaleString()}`, `$${m.total.toLocaleString()}`, m.status].forEach(cell => {
-                    const td = createElement('td', { textContent: cell });
-                    row.appendChild(td);
-                });
+                
+                // Detect phase changes (new debt being targeted)
+                if (m.target !== currentTargetDebt && m.target !== 'None') {
+                    currentTargetDebt = m.target;
+                    phaseColorIndex = (phaseColorIndex + 1) % phaseColors.length;
+                }
+                
+                // Alternate row colors by phase
+                if (index % 2 === 0) {
+                    row.style.backgroundColor = phaseColors[phaseColorIndex];
+                }
+                
+                // Highlight paid off months
+                if (m.status.includes('PAID')) {
+                    row.style.backgroundColor = '#c8e6c9';
+                    row.style.fontWeight = 'bold';
+                }
+                
+                totalPaidSoFar += m.total;
+                const progressPercent = Math.min(100, (totalPaidSoFar / totalDebt) * 100).toFixed(1);
+                
+                // Month
+                row.appendChild(createElement('td', { textContent: m.month }));
+                
+                // Target Debt with visual indicator
+                const targetCell = createElement('td');
+                const debtIcon = m.status.includes('PAID') ? '🎉 ' : '💰 ';
+                targetCell.appendChild(document.createTextNode(debtIcon + m.target));
+                row.appendChild(targetCell);
+                
+                // Payment breakdown
+                row.appendChild(createElement('td', { textContent: `$${m.minimum.toLocaleString()}` }));
+                row.appendChild(createElement('td', { textContent: m.extra > 0 ? `$${m.extra.toLocaleString()}` : '-' }));
+                row.appendChild(createElement('td', { textContent: `$${m.total.toLocaleString()}` }));
+                
+                // Running total
+                const totalCell = createElement('td');
+                totalCell.style.fontWeight = '600';
+                totalCell.style.color = '#005288';
+                totalCell.textContent = `$${totalPaidSoFar.toLocaleString()}`;
+                row.appendChild(totalCell);
+                
+                // Progress
+                const progressCell = createElement('td');
+                const progressBar = createElement('div');
+                progressBar.style.cssText = `
+                    width: 60px;
+                    height: 8px;
+                    background: #e0e0e0;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-right: 5px;
+                `;
+                const fill = createElement('div');
+                fill.style.cssText = `
+                    width: ${progressPercent}%;
+                    height: 100%;
+                    background: linear-gradient(90deg, #4caf50, #8bc34a);
+                    border-radius: 4px;
+                `;
+                progressBar.appendChild(fill);
+                progressCell.appendChild(progressBar);
+                progressCell.appendChild(document.createTextNode(`${progressPercent}%`));
+                row.appendChild(progressCell);
+                
+                // Status
+                const statusCell = createElement('td');
+                if (m.status.includes('PAID')) {
+                    statusCell.innerHTML = '🎉 PAID OFF!';
+                    statusCell.style.color = '#2e7d32';
+                } else {
+                    statusCell.textContent = 'Paying...';
+                    statusCell.style.color = '#666';
+                }
+                row.appendChild(statusCell);
+                
                 tbody.appendChild(row);
             });
 
