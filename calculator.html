@@ -1014,13 +1014,47 @@
             const container = document.getElementById('debtInputs');
             clearElement(container);
             debtCount = 0;
-            const examples = [
-                { name: 'Visa Credit Card', balance: 3500, payment: 85, rate: 19.99 },
-                { name: 'Mastercard', balance: 2200, payment: 60, rate: 17.99 },
-                { name: 'Car Loan', balance: 12500, payment: 350, rate: 5.99 },
-                { name: 'Student Loan', balance: 8500, payment: 200, rate: 4.5 }
+            
+            // Large pool of realistic example debts
+            const debtPool = [
+                { name: 'Chase Sapphire Card', balance: 5200, payment: 120, rate: 22.99 },
+                { name: 'Capital One Card', balance: 2800, payment: 75, rate: 19.99 },
+                { name: 'Discover It Card', balance: 1500, payment: 45, rate: 18.99 },
+                { name: 'Amex Gold Card', balance: 8500, payment: 200, rate: 24.99 },
+                { name: 'Bank of America Card', balance: 3200, payment: 90, rate: 20.99 },
+                { name: 'Citi Double Cash', balance: 4100, payment: 100, rate: 19.99 },
+                { name: 'Wells Fargo Card', balance: 1800, payment: 55, rate: 21.99 },
+                { name: 'US Bank Card', balance: 2300, payment: 65, rate: 18.99 },
+                { name: 'Honda Civic Loan', balance: 14500, payment: 325, rate: 5.49 },
+                { name: 'Toyota Camry Loan', balance: 18900, payment: 395, rate: 4.99 },
+                { name: 'Ford F-150 Loan', balance: 24500, payment: 485, rate: 6.49 },
+                { name: 'BMW 3 Series Loan', balance: 32000, payment: 595, rate: 5.99 },
+                { name: 'Tesla Model 3 Loan', balance: 28500, payment: 525, rate: 5.49 },
+                { name: 'Federal Student Loans', balance: 22000, payment: 280, rate: 4.5 },
+                { name: 'Private Student Loans', balance: 15500, payment: 195, rate: 6.8 },
+                { name: 'Sallie Mae Loan', balance: 18000, payment: 220, rate: 7.2 },
+                { name: 'SoFi Personal Loan', balance: 12000, payment: 350, rate: 11.99 },
+                { name: 'Marcus Personal Loan', balance: 8500, payment: 275, rate: 10.99 },
+                { name: 'PayPal Credit', balance: 2200, payment: 65, rate: 23.99 },
+                { name: 'Affirm Payment Plan', balance: 1800, payment: 150, rate: 15.99 },
+                { name: 'Klarna Balance', balance: 950, payment: 85, rate: 19.99 },
+                { name: 'Afterpay Balance', balance: 650, payment: 65, rate: 0 },
+                { name: 'Medical Debt - Hospital', balance: 4500, payment: 150, rate: 0 },
+                { name: 'Dentist Payment Plan', balance: 3200, payment: 135, rate: 8.99 },
+                { name: 'Vet Care Loan', balance: 2800, payment: 120, rate: 12.99 },
+                { name: 'Home Depot Card', balance: 3500, payment: 100, rate: 17.99 },
+                { name: "Lowe's Card", balance: 2800, payment: 85, rate: 17.99 },
+                { name: 'Amazon Store Card', balance: 1800, payment: 60, rate: 25.99 },
+                { name: 'Best Buy Card', balance: 2200, payment: 75, rate: 23.99 },
+                { name: 'Apple Card', balance: 3200, payment: 95, rate: 19.99 }
             ];
-            examples.forEach(debt => {
+            
+            // Randomly select 3-4 debts
+            const numDebts = Math.floor(Math.random() * 2) + 3; // 3 or 4
+            const shuffled = [...debtPool].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, numDebts);
+            
+            selected.forEach(debt => {
                 addDebtInput();
                 const forms = document.querySelectorAll('.debt-form');
                 const lastForm = forms[forms.length - 1];
