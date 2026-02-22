@@ -1,0 +1,497 @@
+diff --git a/calculator.html b/calculator.html
+index 123456..789abc 100644
+--- a/calculator.html
++++ b/calculator.html
+@@ -5,8 +5,8 @@
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Debt Snowball Calculator | Dave Ramsey Method</title>
+-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
++    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
++    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+     <style>
+         * { margin: 0; padding: 0; box-sizing: border-box; }
+         :root {
+@@ -647,6 +647,7 @@
+             --ramsey-gray-light: #F5F5F5;
+             --ramsey-gray-dark: #212121;
+             --white: #FFFFFF;
++            --ramsey-blue-light: #0077B6;
+         }
+ 
+         .affiliate-section {
+@@ -869,13 +870,13 @@
+                 <div class="affiliate-links">
+-                    <a href="https://www.ramseysolutions.com/store/financial-peace-university" target="_blank" class="affiliate-link">
++                    <a href="https://www.ramseysolutions.com/store/financial-peace-university" target="_blank" rel="noopener noreferrer" class="affiliate-link">
+                         <strong>📖 Financial Peace University</strong>
+                         Dave Ramsey's complete money course
+                     </a>
+-                    <a href="https://www.ramseysolutions.com/store/the-total-money-makeover" target="_blank" class="affiliate-link">
++                    <a href="https://www.ramseysolutions.com/store/the-total-money-makeover" target="_blank" rel="noopener noreferrer" class="affiliate-link">
+                         <strong>📚 The Total Money Makeover</strong>
+                         The book that started it all
+                     </a>
+-                    <a href="https://www.ramseysolutions.com/store/everydollar" target="_blank" class="affiliate-link">
++                    <a href="https://www.ramseysolutions.com/store/everydollar" target="_blank" rel="noopener noreferrer" class="affiliate-link">
+                         <strong>💰 EveryDollar App</strong>
+                         Track your budget and debt progress
+                     </a>
+@@ -931,7 +932,7 @@
+                 try {
+                     const data = JSON.parse(saved);
+                     if (data.debts?.length > 0) {
+-                        document.getElementById('debtInputs').innerHTML = '';
++                        document.getElementById('debtInputs').replaceChildren();
+                         debtCount = 0;
+                         data.debts.forEach(debt => {
+                             addDebtInput();
+@@ -959,7 +960,7 @@
+         }
+ 
+         function loadExample() {
+-            document.getElementById('debtInputs').innerHTML = '';
++            document.getElementById('debtInputs').replaceChildren();
+             debtCount = 0;
+             const examples = [
+                 { name: 'Visa Credit Card', balance: 3500, payment: 85, rate: 19.99 },
+@@ -982,7 +983,7 @@
+         function clearAll() {
+             if (confirm('Clear all debts?')) {
+-                document.getElementById('debtInputs').innerHTML = '';
++                document.getElementById('debtInputs').replaceChildren();
+                 debtCount = 0;
+                 addDebtInput();
+                 saveData();
+@@ -1018,10 +1019,18 @@
+                 saver: { icon: '💰', name: 'Super Saver' }
+             };
+             const container = document.getElementById('earnedBadges');
+-            container.innerHTML = earnedBadges.map(id => {
+-                const badge = badges[id];
+-                return `<div class="earned-badge">${badge.icon} ${badge.name}</div>`;
+-            }).join('');
++            container.replaceChildren();
++            earnedBadges.forEach(id => {
++                const badge = badges[id];
++                if (!badge) return;
++                const badgeEl = document.createElement('div');
++                badgeEl.className = 'earned-badge';
++                badgeEl.textContent = `${badge.icon} ${badge.name}`;
++                container.appendChild(badgeEl);
++            });
+         }
+ 
+         function startCountdown(targetDate) {
+@@ -1030,19 +1039,33 @@
+             section.classList.add('show');
+             function update() {
+                 const now = new Date();
+                 const diff = targetDate - now;
++                const timer = document.getElementById('countdownTimer');
++                const createCountdownUnit = (value, label) => {
++                    const unit = document.createElement('div');
++                    unit.className = 'countdown-unit';
++                    const valueEl = document.createElement('div');
++                    valueEl.className = 'countdown-value';
++                    valueEl.textContent = value;
++                    const labelEl = document.createElement('div');
++                    labelEl.className = 'countdown-label';
++                    labelEl.textContent = label;
++                    unit.append(valueEl, labelEl);
++                    return unit;
++                };
+                 if (diff <= 0) {
+-                    document.getElementById('countdownTimer').innerHTML = '<div class="countdown-unit"><div class="countdown-value">🎉</div><div class="countdown-label">DEBT FREE!</div></div>';
++                    timer.replaceChildren(createCountdownUnit('🎉', 'DEBT FREE!'));
+                     return;
+                 }
+                 const years = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+                 const months = Math.floor((diff % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
+                 const days = Math.floor((diff % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+                 const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+-                document.getElementById('countdownTimer').innerHTML = `
+-                    ${years > 0 ? `<div class="countdown-unit"><div class="countdown-value">${years}</div><div class="countdown-label">Years</div></div>` : ''}
+-                    ${months > 0 ? `<div class="countdown-unit"><div class="countdown-value">${months}</div><div class="countdown-label">Months</div></div>` : ''}
+-                    <div class="countdown-unit"><div class="countdown-value">${days}</div><div class="countdown-label">Days</div></div>
+-                    <div class="countdown-unit"><div class="countdown-value">${hours}</div><div class="countdown-label">Hours</div></div>
+-                `;
++                timer.replaceChildren();
++                if (years > 0) timer.appendChild(createCountdownUnit(years, 'Years'));
++                if (months > 0) timer.appendChild(createCountdownUnit(months, 'Months'));
++                timer.appendChild(createCountdownUnit(days, 'Days'));
++                timer.appendChild(createCountdownUnit(hours, 'Hours'));
+             }
+             update();
+             countdownInterval = setInterval(update, 60000);
+@@ -1105,29 +1128,62 @@
+             const interestSaved = baseResult.totalInterest - extraResult.totalInterest;
+             const resultEl = document.getElementById('whatifResult');
+-            resultEl.innerHTML = `
+-                <strong>What if you pay $${amount} extra per month?</strong><br>
+-                🎉 You'd be debt-free <strong>${monthsSaved} months sooner</strong>!<br>
+-                💰 And save <strong>$${Math.round(interestSaved).toLocaleString()}</strong> in interest!
+-            `;
++            resultEl.replaceChildren();
++            const line1 = document.createElement('strong');
++            line1.textContent = `What if you pay $${amount} extra per month?`;
++            const line2 = document.createElement('strong');
++            line2.textContent = `${monthsSaved} months sooner`;
++            const line3 = document.createElement('strong');
++            line3.textContent = `$${Math.round(interestSaved).toLocaleString()}`;
++            resultEl.append(
++                line1,
++                document.createElement('br'),
++                document.createTextNode("🎉 You'd be debt-free "),
++                line2,
++                document.createTextNode('!'),
++                document.createElement('br'),
++                document.createTextNode('💰 And save '),
++                line3,
++                document.createTextNode(' in interest!')
++            );
+             resultEl.classList.add('show');
+         }
+ 
+         function whatIfBonus(amount) {
+@@ -1138,15 +1194,31 @@
+             const interestSaved = baseResult.totalInterest - bonusResult.totalInterest;
+             const resultEl = document.getElementById('whatifResult');
+-            resultEl.innerHTML = `
+-                <strong>What if you apply a $${amount.toLocaleString()} bonus?</strong><br>
+-                🎉 You'd be debt-free <strong>${monthsSaved} month${monthsSaved !== 1 ? 's' : ''} sooner</strong>!<br>
+-                💰 And save <strong>$${Math.round(interestSaved).toLocaleString()}</strong> in interest!
+-            `;
++            resultEl.replaceChildren();
++            const line1 = document.createElement('strong');
++            line1.textContent = `What if you apply a $${amount.toLocaleString()} bonus?`;
++            const line2 = document.createElement('strong');
++            line2.textContent = `${monthsSaved} month${monthsSaved !== 1 ? 's' : ''} sooner`;
++            const line3 = document.createElement('strong');
++            line3.textContent = `$${Math.round(interestSaved).toLocaleString()}`;
++            resultEl.append(
++                line1,
++                document.createElement('br'),
++                document.createTextNode("🎉 You'd be debt-free "),
++                line2,
++                document.createTextNode('!'),
++                document.createElement('br'),
++                document.createTextNode('💰 And save '),
++                line3,
++                document.createTextNode(' in interest!')
++            );
+             resultEl.classList.add('show');
+         }
+ 
+         function setMethod(method) {
+             currentMethod = method;
+-            document.getElementById('snowballBtn').classList.toggle('active', method === 'snowball');
+-            document.getElementById('avalancheBtn').classList.toggle('active', method === 'avalanche');
+-            const desc = method === 'snowball' 
+-                ? '<strong>Debt Snowball:</strong> Pay smallest debts first for quick wins and motivation.'
+-                : '<strong>Debt Avalanche:</strong> Pay highest interest debts first to save the most money.';
+-            document.getElementById('methodDesc').innerHTML = desc;
++            const snowballBtn = document.getElementById('snowballBtn');
++            const avalancheBtn = document.getElementById('avalancheBtn');
++            snowballBtn.classList.toggle('active', method === 'snowball');
++            avalancheBtn.classList.toggle('active', method === 'avalanche');
++            snowballBtn.setAttribute('aria-pressed', method === 'snowball');
++            avalancheBtn.setAttribute('aria-pressed', method === 'avalanche');
++            const descEl = document.getElementById('methodDesc');
++            descEl.replaceChildren();
++            const strong = document.createElement('strong');
++            strong.textContent = method === 'snowball' ? 'Debt Snowball:' : 'Debt Avalanche:';
++            const restText = method === 'snowball'
++                ? ' Pay smallest debts first for quick wins and motivation.'
++                : ' Pay highest interest debts first to save the most money.';
++            descEl.append(strong, document.createTextNode(restText));
+             saveData();
+             if (lastCalculatedDebts.length > 0) calculateSnowball();
+         }
+ 
+         function addDebtInput() {
+             debtCount++;
+             const container = document.getElementById('debtInputs');
+             const newDebt = document.createElement('div');
+             newDebt.className = 'debt-form';
+-            newDebt.innerHTML = `
+-                <div class="form-row">
+-                    <div><label>Debt Name</label><input type="text" class="debt-name-input" placeholder="e.g., Credit Card ${debtCount}"></div>
+-                    <div><label>Balance ($)</label><input type="number" class="debt-balance-input" placeholder="0" min="0" step="0.01"></div>
+-                    <div><label>Min Payment ($)</label><input type="number" class="debt-payment-input" placeholder="0" min="0" step="0.01"></div>
+-                    <div><label>Interest Rate (%)</label><input type="number" class="debt-rate-input" placeholder="0" min="0" step="0.01"></div>
+-                    <button class="btn btn-danger" onclick="removeDebt(this)">✕</button>
+-                </div>
+-            `;
++            const formRow = document.createElement('div');
++            formRow.className = 'form-row';
++
++            const createField = (labelText, input) => {
++                const wrapper = document.createElement('div');
++                const label = document.createElement('label');
++                label.textContent = labelText;
++                label.setAttribute('for', input.id);
++                wrapper.append(label, input);
++                return wrapper;
++            };
++
++            const nameInput = document.createElement('input');
++            nameInput.type = 'text';
++            nameInput.className = 'debt-name-input';
++            nameInput.placeholder = `e.g., Credit Card ${debtCount}`;
++            nameInput.id = `debt-name-${debtCount}`;
++
++            const balanceInput = document.createElement('input');
++            balanceInput.type = 'number';
++            balanceInput.className = 'debt-balance-input';
++            balanceInput.placeholder = '0';
++            balanceInput.min = '0';
++            balanceInput.step = '0.01';
++            balanceInput.id = `debt-balance-${debtCount}`;
++
++            const paymentInput = document.createElement('input');
++            paymentInput.type = 'number';
++            paymentInput.className = 'debt-payment-input';
++            paymentInput.placeholder = '0';
++            paymentInput.min = '0';
++            paymentInput.step = '0.01';
++            paymentInput.id = `debt-payment-${debtCount}`;
++
++            const rateInput = document.createElement('input');
++            rateInput.type = 'number';
++            rateInput.className = 'debt-rate-input';
++            rateInput.placeholder = '0';
++            rateInput.min = '0';
++            rateInput.step = '0.01';
++            rateInput.id = `debt-rate-${debtCount}`;
++
++            const removeButton = document.createElement('button');
++            removeButton.className = 'btn btn-danger';
++            removeButton.type = 'button';
++            removeButton.setAttribute('aria-label', 'Remove debt');
++            removeButton.textContent = '✕';
++            removeButton.addEventListener('click', () => removeDebt(removeButton));
++
++            formRow.append(
++                createField('Debt Name', nameInput),
++                createField('Balance ($)', balanceInput),
++                createField('Min Payment ($)', paymentInput),
++                createField('Interest Rate (%)', rateInput),
++                removeButton
++            );
++            newDebt.appendChild(formRow);
+             container.appendChild(newDebt);
+             updateRemoveButtons();
+         }
+@@ -1248,16 +1388,34 @@
+-                for (let debt of debts) {
+-                    if (debt.balance > 0.01) {
+-                        debt.balance = Math.max(0, parseFloat((debt.balance - extraPayment).toFixed(2)));
+-                        if (debt.balance <= 0.01 && !debt.paidOff) {
+-                            debt.paidOff = month;
+-                            const date = new Date(startDate);
+-                            date.setMonth(date.getMonth() + month);
+-                            timeline.push({ month, date: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), debt: debt.name });
+-                        }
+-                        break;
+-                    }
+-                }
++                let extraApplied = 0;
++                for (let debt of debts) {
++                    if (debt.balance > 0.01 && extraPayment > 0) {
++                        const payment = Math.min(extraPayment, debt.balance);
++                        debt.balance = parseFloat((debt.balance - payment).toFixed(2));
++                        extraPayment -= payment;
++                        extraApplied += payment;
++                        if (debt.balance <= 0.01 && !debt.paidOff) {
++                            debt.balance = 0;
++                            debt.paidOff = month;
++                            const date = new Date(startDate);
++                            date.setMonth(date.getMonth() + month);
++                            timeline.push({ month, date: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), debt: debt.name });
++                        }
++                        if (extraPayment <= 0) break;
++                    }
++                }
+ 
+                 monthlyBreakdown.push({
+                     month,
+                     target: targetDebt?.name || 'None',
+                     minimum: debts.reduce((sum, d) => sum + (d.originalBalance > 0 ? d.payment : 0), 0),
+-                    extra: extra,
+-                    total: debts.reduce((sum, d) => sum + d.payment, 0) + extra,
++                    extra: extraApplied,
++                    total: debts.reduce((sum, d) => sum + d.payment, 0) + extraApplied,
+                     status: targetDebt?.paidOff === month ? 'PAID OFF! 🎉' : 'Paying down'
+                 });
+@@ -1314,15 +1472,28 @@
+             document.getElementById('interestSaved').textContent = formatMoney(interestSaved);
+ 
+             const tbody = document.getElementById('breakdownBody');
+-            tbody.innerHTML = result.monthlyBreakdown.map(m => `
+-                <tr class="${m.status.includes('PAID') ? 'paid-off' : ''}">
+-                    <td>${m.month}</td>
+-                    <td>${m.target}</td>
+-                    <td>$${m.minimum.toLocaleString()}</td>
+-                    <td>$${m.extra.toLocaleString()}</td>
+-                    <td>$${m.total.toLocaleString()}</td>
+-                    <td>${m.status}</td>
+-                </tr>
+-            `).join('');
++            tbody.replaceChildren();
++            result.monthlyBreakdown.forEach(m => {
++                const row = document.createElement('tr');
++                if (m.status.includes('PAID')) row.className = 'paid-off';
++                const cells = [
++                    m.month,
++                    m.target,
++                    `$${m.minimum.toLocaleString()}`,
++                    `$${m.extra.toLocaleString()}`,
++                    `$${m.total.toLocaleString()}`,
++                    m.status
++                ];
++                cells.forEach(cell => {
++                    const td = document.createElement('td');
++                    td.textContent = cell;
++                    row.appendChild(td);
++                });
++                tbody.appendChild(row);
++            });
+ 
+-            let debtListHTML = '';
++            const debtList = document.getElementById('debtList');
++            debtList.replaceChildren();
+             result.debts.forEach((debt, index) => {
+                 const original = originalDebts.find(d => d.name === debt.name);
+                 const isPaid = debt.paidOff > 0;
+                 const isCurrent = !isPaid && result.debts.findIndex(d => d.name === debt.name && !d.paidOff) === result.debts.findIndex(d => !d.paidOff);
+                 const percentPaid = isPaid ? 100 : Math.max(0, Math.min(100, ((original.originalBalance - debt.balance) / original.originalBalance * 100)));
+-                
+-                debtListHTML += `
+-                    <div class="debt-item ${isPaid ? 'paid' : ''} ${isCurrent ? 'current' : ''}">
+-                        <div class="debt-header">
+-                            <div>
+-                                <span class="debt-name">${index + 1}. ${debt.name}</span>
+-                                ${isCurrent ? '<span class="badge badge-current">⚡ Focus Here</span>' : ''}
+-                                ${isPaid ? '<span class="badge badge-paid">✓ Paid Off</span>' : ''}
+-                                ${!isPaid && !isCurrent ? '<span class="badge badge-upcoming">Up Next</span>' : ''}
+-                            </div>
+-                            <div class="debt-balance">${formatMoney(original.originalBalance)}</div>
+-                        </div>
+-                        <div class="progress-bar">
+-                            <div class="progress-fill" style="width: ${percentPaid}%"></div>
+-                            <div class="progress-text">${percentPaid.toFixed(0)}% Complete</div>
+-                        </div>
+-                        <div class="debt-details">
+-                            <div class="detail-item"><div class="detail-label">Payment</div><div class="detail-value">${formatMoney(original.payment)}/mo</div></div>
+-                            <div class="detail-item"><div class="detail-label">Rate</div><div class="detail-value">${original.rate}%</div></div>
+-                            <div class="detail-item"><div class="detail-label">${isPaid ? 'Paid Off' : 'Order'}</div><div class="detail-value">${isPaid ? debt.paidOff + ' mo' : '#' + (index + 1)}</div></div>
+-                        </div>
+-                    </div>
+-                `;
++                const item = document.createElement('div');
++                item.className = `debt-item${isPaid ? ' paid' : ''}${isCurrent ? ' current' : ''}`;
++                const header = document.createElement('div');
++                header.className = 'debt-header';
++                const nameWrap = document.createElement('div');
++                const nameEl = document.createElement('span');
++                nameEl.className = 'debt-name';
++                nameEl.textContent = `${index + 1}. ${debt.name}`;
++                nameWrap.appendChild(nameEl);
++                if (isCurrent) {
++                    const badge = document.createElement('span');
++                    badge.className = 'badge badge-current';
++                    badge.textContent = '⚡ Focus Here';
++                    nameWrap.appendChild(badge);
++                }
++                if (isPaid) {
++                    const badge = document.createElement('span');
++                    badge.className = 'badge badge-paid';
++                    badge.textContent = '✓ Paid Off';
++                    nameWrap.appendChild(badge);
++                }
++                if (!isPaid && !isCurrent) {
++                    const badge = document.createElement('span');
++                    badge.className = 'badge badge-upcoming';
++                    badge.textContent = 'Up Next';
++                    nameWrap.appendChild(badge);
++                }
++                const balanceEl = document.createElement('div');
++                balanceEl.className = 'debt-balance';
++                balanceEl.textContent = formatMoney(original.originalBalance);
++                header.append(nameWrap, balanceEl);
++                const progress = document.createElement('div');
++                progress.className = 'progress-bar';
++                const fill = document.createElement('div');
++                fill.className = 'progress-fill';
++                fill.style.width = `${percentPaid}%`;
++                const progressText = document.createElement('div');
++                progressText.className = 'progress-text';
++                progressText.textContent = `${percentPaid.toFixed(0)}% Complete`;
++                progress.append(fill, progressText);
++                const details = document.createElement('div');
++                details.className = 'debt-details';
++                const buildDetail = (label, value) => {
++                    const item = document.createElement('div');
++                    item.className = 'detail-item';
++                    const labelEl = document.createElement('div');
++                    labelEl.className = 'detail-label';
++                    labelEl.textContent = label;
++                    const valueEl = document.createElement('div');
++                    valueEl.className = 'detail-value';
++                    valueEl.textContent = value;
++                    item.append(labelEl, valueEl);
++                    return item;
++                };
++                details.append(
++                    buildDetail('Payment', `${formatMoney(original.payment)}/mo`),
++                    buildDetail('Rate', `${original.rate}%`),
++                    buildDetail(isPaid ? 'Paid Off' : 'Order', isPaid ? `${debt.paidOff} mo` : `#${index + 1}`)
++                );
++                item.append(header, progress, details);
++                debtList.appendChild(item);
+             });
+-            document.getElementById('debtList').innerHTML = debtListHTML;
+ 
+             const paidOffCount = result.debts.filter(d => d.paidOff > 0).length;
+             if (paidOffCount >= result.debts.length / 2) awardBadge('halfway');
+             if (paidOffCount > 0) awardBadge('firstdebt');
+ 
+             const celebration = document.getElementById('celebration');
+             celebration.classList.add('show');
+-            document.getElementById('celebrationMessage').innerHTML = 
+-                `Following this plan, you'll be completely debt-free by <strong>${result.finalDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong>.<br>Imagine how that will feel!`;
++            const celebrationMessage = document.getElementById('celebrationMessage');
++            celebrationMessage.replaceChildren();
++            const strong = document.createElement('strong');
++            strong.textContent = result.finalDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
++            celebrationMessage.append(
++                document.createTextNode("Following this plan, you'll be completely debt-free by "),
++                strong,
++                document.createTextNode('.'),
++                document.createElement('br'),
++                document.createTextNode('Imagine how that will feel!')
++            );
+ 
+             document.getElementById('shareDebtFreeDate').textContent = result.finalDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+             document.getElementById('shareMessage').textContent = 
+                 `I'm on track to pay off ${formatMoney(totalDebt)} in debt using the ${currentMethod} method${extraPaymentAmount > 0 ? ' with ' + formatMoney(extraPaymentAmount) + '/mo extra' : ''}!`;
+-            document.getElementById('shareBadges').innerHTML = earnedBadges.map(id => {
+-                const badges = { explorer: '🔍', calculator: '🧮', snowball: '🏔️', avalanche: '⛰️', extramiler: '⚡', debtfree: '🎉', firstdebt: '🎯', halfway: '📈', saver: '💰' };
+-                return `<span style="font-size: 1.5rem; margin: 0 5px;">${badges[id]}</span>`;
+-            }).join('');
++            const shareBadges = document.getElementById('shareBadges');
++            shareBadges.replaceChildren();
++            const badges = { explorer: '🔍', calculator: '🧮', snowball: '🏔️', avalanche: '⛰️', extramiler: '⚡', debtfree: '🎉', firstdebt: '🎯', halfway: '📈', saver: '💰' };
++            earnedBadges.forEach(id => {
++                if (!badges[id]) return;
++                const badge = document.createElement('span');
++                badge.style.fontSize = '1.5rem';
++                badge.style.margin = '0 5px';
++                badge.textContent = badges[id];
++                shareBadges.appendChild(badge);
++            });
+ 
+             document.getElementById('results').classList.add('show');
+         }
