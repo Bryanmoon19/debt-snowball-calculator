@@ -1088,11 +1088,44 @@
 
         function clearAll() {
             if (confirm('Clear all debts?')) {
+                // Clear debt inputs
                 const container = document.getElementById('debtInputs');
                 clearElement(container);
                 debtCount = 0;
                 addDebtInput();
+                
+                // Hide results
+                document.getElementById('results').classList.remove('show');
+                document.getElementById('comparisonSection').style.display = 'none';
+                document.getElementById('celebration').classList.remove('show');
+                document.getElementById('countdownSection').classList.remove('show');
+                
+                // Clear breakdown table
+                clearElement(document.getElementById('breakdownBody'));
+                clearElement(document.getElementById('debtList'));
+                
+                // Reset extra payment slider
+                extraPaymentAmount = 0;
+                document.getElementById('extraPayment').value = 0;
+                document.getElementById('extraAmount').textContent = '$0';
+                document.getElementById('timeSaved').textContent = '';
+                
+                // Clear what-if results
+                document.getElementById('whatifResult').classList.remove('show');
+                clearElement(document.getElementById('whatifResult'));
+                
+                // Reset data
+                lastCalculatedDebts = [];
+                lastResults = null;
+                if (countdownInterval) clearInterval(countdownInterval);
+                
                 saveData();
+                
+                // Show confirmation
+                showToast('All cleared! Start fresh 💪');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
