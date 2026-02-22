@@ -25,6 +25,6 @@ A premium debt payoff calculator using Dave Ramsey's proven method.
 
 All Rights Reserved. Proprietary software.
 
-Copyright (c) 2024 Bryan Moon
+Copyright (c) 2025 Bryan Luna
 
 Not affiliated with Dave Ramsey or Ramsey Solutions.
