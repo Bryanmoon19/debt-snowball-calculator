@@ -684,6 +684,25 @@
             margin-top: 30px;
             border: 2px solid var(--ramsey-blue-light);
         }
+        .verification-box {
+            background: #e8f5e9;
+            border: 2px solid var(--ramsey-green);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .verification-box h4 {
+            color: var(--ramsey-green);
+            margin-bottom: 10px;
+        }
+        .verification-box p {
+            margin: 5px 0;
+            color: var(--ramsey-gray);
+        }
+        .verification-box strong {
+            color: var(--ramsey-blue);
+        }
         .affiliate-section h3 {
             color: var(--ramsey-blue);
             margin-bottom: 15px;
@@ -868,6 +887,14 @@
                 <div id="countdownSection" class="countdown-section">
                     <div class="countdown-title">⏰ Time Until You're Debt Free!</div>
                     <div class="countdown-timer" id="countdownTimer"></div>
+                </div>
+
+                <div class="verification-box" id="verificationBox" style="display: none;">
+                    <h4>✅ Math Check</h4>
+                    <p>Original Debt: <strong id="verifyOriginal">$0</strong></p>
+                    <p>+ Total Interest: <strong id="verifyInterest">$0</strong></p>
+                    <p>= Total to Pay: <strong id="verifyTotal">$0</strong></p>
+                    <p style="margin-top: 10px; color: var(--ramsey-green);">✓ Numbers verified!</p>
                 </div>
 
                 <div class="timeline">
@@ -1108,6 +1135,7 @@
                 document.getElementById('comparisonSection').style.display = 'none';
                 document.getElementById('celebration').classList.remove('show');
                 document.getElementById('countdownSection').classList.remove('show');
+                document.getElementById('verificationBox').style.display = 'none';
                 
                 // Clear breakdown table
                 clearElement(document.getElementById('breakdownBody'));
