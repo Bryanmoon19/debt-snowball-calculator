@@ -1,0 +1,13 @@
+# Ignore backup files
+*.backup
+*.patch
+
+# Ignore test files
+test-calculation.js
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore setup script (it's just for you)
+setup-github.sh
