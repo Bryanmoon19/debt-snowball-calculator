@@ -1526,6 +1526,10 @@
         function showComparison(snowball, avalanche) {
             document.getElementById('comparisonSection').style.display = 'grid';
             
+            // DEBUG: Log the actual values
+            console.log('Snowball:', snowball.months, 'months, $', snowball.totalInterest, 'interest');
+            console.log('Avalanche:', avalanche.months, 'months, $', avalanche.totalInterest, 'interest');
+            
             // Update the display values
             document.getElementById('snowballTime').textContent = snowball.months + ' months';
             document.getElementById('snowballInterest').textContent = formatMoney(snowball.totalInterest);
