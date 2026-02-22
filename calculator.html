@@ -157,8 +157,26 @@
         }
         .method-desc {
             margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--ramsey-blue);
             font-size: 0.95rem;
             color: var(--ramsey-gray);
+            line-height: 1.7;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
         .whatif-section {
             background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
@@ -1256,14 +1274,60 @@
             
             const descEl = document.getElementById('methodDesc');
             clearElement(descEl);
+            
+            // Create visually distinct description
+            const icon = createElement('span', { textContent: method === 'snowball' ? '🏔️ ' : '⛰️ ' });
+            icon.style.fontSize = '1.2rem';
+            icon.style.marginRight = '5px';
+            
             const strong = createElement('strong');
-            strong.textContent = method === 'snowball' ? 'Debt Snowball:' : 'Debt Avalanche:';
+            strong.textContent = method === 'snowball' ? 'Debt Snowball: ' : 'Debt Avalanche: ';
+            strong.style.color = 'var(--ramsey-blue)';
+            
             const restText = method === 'snowball'
-                ? ' Pay smallest debts first for quick wins and motivation.'
-                : ' Pay highest interest debts first to save the most money.';
-            descEl.append(strong, document.createTextNode(restText));
+                ? 'Pay smallest debts first for quick wins and motivation. Great for staying motivated!'
+                : 'Pay highest interest debts first to save the most money. Best for math-minded people!';
+            
+            descEl.append(icon, strong, document.createTextNode(restText));
+            
+            // Show toast notification
+            showToast(`Switched to ${method === 'snowball' ? 'Debt Snowball' : 'Debt Avalanche'} method`);
+            
             saveData();
-            if (lastCalculatedDebts.length > 0) calculateSnowball();
+            
+            // Recalculate if we have data
+            if (lastCalculatedDebts.length > 0) {
+                calculateSnowball();
+                showToast(`Recalculated with ${method === 'snowball' ? 'Snowball' : 'Avalanche'} method!`);
+            }
+        }
+        
+        function showToast(message) {
+            // Remove existing toast
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            
+            const toast = createElement('div', { className: 'toast-notification', textContent: message });
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--ramsey-blue);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 10000;
+                animation: slideUp 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
         }
 
         function addDebtInput() {
