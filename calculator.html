@@ -1525,6 +1525,8 @@
 
         function showComparison(snowball, avalanche) {
             document.getElementById('comparisonSection').style.display = 'grid';
+            
+            // Update the display values
             document.getElementById('snowballTime').textContent = snowball.months + ' months';
             document.getElementById('snowballInterest').textContent = formatMoney(snowball.totalInterest);
             document.getElementById('avalancheTime').textContent = avalanche.months + ' months';
@@ -1532,6 +1534,8 @@
 
             const snowballCard = document.getElementById('snowballCard');
             const avalancheCard = document.getElementById('avalancheCard');
+            
+            // Clear previous winner styling
             snowballCard.classList.remove('winner');
             avalancheCard.classList.remove('winner');
             
@@ -1540,15 +1544,74 @@
             if (sbBadge) sbBadge.remove();
             if (avBadge) avBadge.remove();
 
-            if (avalanche.months <= snowball.months && avalanche.totalInterest <= snowball.totalInterest) {
+            // Calculate differences
+            const monthsDiff = snowball.months - avalanche.months;
+            const interestDiff = snowball.totalInterest - avalanche.totalInterest;
+            
+            // Determine winner based on which method is better overall
+            // Score: -1 = worse, 0 = tie, 1 = better
+            const snowballScore = (monthsDiff > 0 ? 1 : 0) + (interestDiff > 0 ? 1 : 0);
+            const avalancheScore = (monthsDiff < 0 ? 1 : 0) + (interestDiff < 0 ? 1 : 0);
+            
+            if (avalancheScore > snowballScore) {
+                // Avalanche is clearly better
                 avalancheCard.classList.add('winner');
-                const badge = createElement('span', { className: 'winner-badge', textContent: '🏆 Recommended' });
+                const badge = createElement('span', { className: 'winner-badge', textContent: '🏆 Saves More $' });
                 avalancheCard.appendChild(badge);
-            } else if (snowball.months <= avalanche.months) {
+            } else if (snowballScore > avalancheScore) {
+                // Snowball is clearly better (rare, but happens)
                 snowballCard.classList.add('winner');
-                const badge = createElement('span', { className: 'winner-badge', textContent: '🏆 Recommended' });
+                const badge = createElement('span', { className: 'winner-badge', textContent: '🏆 Faster Win' });
                 snowballCard.appendChild(badge);
+            } else {
+                // They're tied or trade-offs - highlight the differences
+                if (monthsDiff === 0 && interestDiff === 0) {
+                    // Exactly the same - show both as equal
+                    const sbEqual = createElement('span', { className: 'winner-badge', textContent: '✓ Same Result' });
+                    sbEqual.style.background = '#666';
+                    snowballCard.appendChild(sbEqual);
+                } else if (monthsDiff === 0) {
+                    // Same time, different interest
+                    avalancheCard.classList.add('winner');
+                    const badge = createElement('span', { className: 'winner-badge', textContent: `💰 Save ${formatMoney(Math.abs(interestDiff))}` });
+                    avalancheCard.appendChild(badge);
+                } else if (interestDiff === 0) {
+                    // Same interest, different time
+                    const faster = monthsDiff < 0 ? snowballCard : avalancheCard;
+                    faster.classList.add('winner');
+                    const badge = createElement('span', { className: 'winner-badge', textContent: `⚡ ${Math.abs(monthsDiff)} mo faster` });
+                    faster.appendChild(badge);
+                } else {
+                    // Trade-off: highlight what's better about each
+                    if (monthsDiff < 0) {
+                        // Snowball is faster
+                        snowballCard.classList.add('winner');
+                        const badge = createElement('span', { className: 'winner-badge', textContent: `⚡ ${Math.abs(monthsDiff)} mo faster` });
+                        snowballCard.appendChild(badge);
+                    } else {
+                        avalancheCard.classList.add('winner');
+                        const badge = createElement('span', { className: 'winner-badge', textContent: `💰 Save ${formatMoney(Math.abs(interestDiff))}` });
+                        avalancheCard.appendChild(badge);
+                    }
+                }
             }
+            
+            // Add comparison summary text
+            const methodDesc = document.getElementById('methodDesc');
+            const existingSummary = methodDesc.querySelector('.comparison-summary');
+            if (existingSummary) existingSummary.remove();
+            
+            const summary = createElement('div', { className: 'comparison-summary' });
+            summary.style.cssText = 'margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 6px; font-size: 0.9rem;';
+            
+            if (monthsDiff === 0 && interestDiff === 0) {
+                summary.textContent = '📊 Both methods give the exact same result!';
+            } else {
+                const timeText = monthsDiff === 0 ? 'same time' : monthsDiff < 0 ? `${Math.abs(monthsDiff)} months faster` : `${Math.abs(monthsDiff)} months slower`;
+                const moneyText = interestDiff === 0 ? 'same interest' : interestDiff > 0 ? `saves ${formatMoney(Math.abs(interestDiff))}` : `costs ${formatMoney(Math.abs(interestDiff))} more`;
+                summary.textContent = `📊 Avalanche is ${timeText} and ${moneyText}`;
+            }
+            methodDesc.appendChild(summary);
         }
 
         function displayResults(result, originalDebts) {
