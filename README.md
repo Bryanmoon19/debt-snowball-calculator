@@ -1,6 +1,6 @@
 # 🎯 Debt Snowball Calculator
 
-A free, beautiful debt payoff calculator using Dave Ramsey's proven method.
+A premium debt payoff calculator using Dave Ramsey's proven method.
 
 **Live Site:** https://debtsnowballcalculator.com
 
@@ -14,26 +14,17 @@ A free, beautiful debt payoff calculator using Dave Ramsey's proven method.
 - 🎨 **Coloring Tracker** — Printable tracker to color in
 - 📤 **Export Options** — CSV, Calendar, PDF, Image
 
-## 🚀 Tech Stack
+## 🛡️ Privacy First
 
-- Pure HTML/CSS/JavaScript (no frameworks)
-- LocalStorage for data persistence
-- 100% client-side (no server, no data collection)
-
-## 🛡️ Security
-
-- XSS-safe (no innerHTML, all DOM built safely)
-- ARIA accessible
-- No external data transmission
-
-## 📄 Files
-
-- `index.html` — Landing page
-- `calculator.html` — The calculator app
-- `manifest.json` — PWA manifest
+- 100% client-side (no data leaves your device)
+- No signup required
+- No tracking or analytics
+- Your debt info stays private
 
 ## 📝 License
 
-MIT — Free to use, modify, and distribute.
+All Rights Reserved. Proprietary software.
+
+Copyright (c) 2024 Bryan Moon
 
 Not affiliated with Dave Ramsey or Ramsey Solutions.
